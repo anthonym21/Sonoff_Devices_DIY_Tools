@@ -35,7 +35,6 @@ class Http_API(object):
         :param data: data segment
         :return:
         """
-        ret = {}
         # Here you need to add data with or without checksum and url with or
         # without checksum
         json_str = json.dumps(data)
@@ -48,9 +47,7 @@ class Http_API(object):
         print("RETURN response：", response.text)
         self.write_log("RETURN response")
         self.write_log(response.text)
-        ret["result"] = True
-        ret["text"] = response.text
-        return ret
+        return {"result": True, "text": response.text}
 
     def write_log(self, log_data):
         """
@@ -106,7 +103,7 @@ class ThreadForQT(QThread):
     def __init__(self, parent=None, **func_task):
         super(ThreadForQT, self).__init__(parent)
         # Device information (deviceID IP PORT)
-        print("func_task", str(func_task))
+        print("func_task", func_task)
         self.all_info_dict = func_task["info"]
         # The user selects the device list
         self.all_dev_id = func_task["select_name_list"]
@@ -224,12 +221,10 @@ class ThreadForQT(QThread):
         :return:
         """
         out_sta = info["OUT"]
-        data = {}
         # 1. Assembly url.
         url = "http://" + info["ip"] + ":" + \
-            str(info["port"]) + "/zeroconf/switch"
-        # 2. Assemble data.
-        data["sequence"] = str(int(time.time()))
+                str(info["port"]) + "/zeroconf/switch"
+        data = {"sequence": str(int(time.time()))}
         sub_id = info["sub_id"]
         data["deviceid"] = sub_id
 		if out_sta:
@@ -254,12 +249,10 @@ class ThreadForQT(QThread):
         :return:
         """
         state = info["state"]
-        data = {}
         # 1. Assembly url.
         url = "http://" + info["ip"] + ":" + \
-            str(info["port"]) + "/zeroconf/startup"
-        # 2. Assemble data.
-        data["sequence"] = str(int(time.time()))
+                str(info["port"]) + "/zeroconf/startup"
+        data = {"sequence": str(int(time.time()))}
         sub_id = info["sub_id"]
         data["deviceid"] = sub_id
 		if(state== 0):
@@ -284,12 +277,10 @@ class ThreadForQT(QThread):
                     sub_id(str)The id number of the device
         :return:
         """
-        data = {}
         # 1. Assembly url.
         url = "http://" + info["ip"] + ":" + \
-            str(info["port"]) + "/zeroconf/signal_strength"
-        # 2. Assemble data.
-        data["sequence"] = str(int(time.time()))
+                str(info["port"]) + "/zeroconf/signal_strength"
+        data = {"sequence": str(int(time.time()))}
         sub_id = info["sub_id"]
         data["deviceid"] = sub_id
         data["data"] = { }
@@ -313,12 +304,10 @@ class ThreadForQT(QThread):
         """
         pulseWidth = info["pulseWidth"]
         pulse = info["pulse"]
-        data = {}
         # 1. Assembly url.
         url = "http://" + info["ip"] + ":" + \
-            str(info["port"]) + "/zeroconf/pulse"
-        # 2. Assemble data.
-        data["sequence"] = str(int(time.time()))
+                str(info["port"]) + "/zeroconf/pulse"
+        data = {"sequence": str(int(time.time()))}
         sub_id = info["sub_id"]
         data["deviceid"] = sub_id
         data["data"]=	{"pulse": pulse,"pulseWidth": pulseWidth}
@@ -342,12 +331,10 @@ class ThreadForQT(QThread):
         """
         ssid = info["ssid"]
         password = info["password"]
-        data = {}
         # 1. Assembly url.
         url = "http://" + info["ip"] + ":" + \
-            str(info["port"]) + "/zeroconf/wifi"
-        # 2. Assemble data.
-        data["sequence"] = str(int(time.time()))
+                str(info["port"]) + "/zeroconf/wifi"
+        data = {"sequence": str(int(time.time()))}
         sub_id = info["sub_id"]
         data["deviceid"] = sub_id
         data["data"]=	{"ssid": ssid, "password":  password}
@@ -368,12 +355,10 @@ class ThreadForQT(QThread):
         :return:
         """
         sub_dict = info
-        data = {}
         # 1. Assembly url.
         url = "http://" + info["ip"] + ":" + \
-            str(info["port"]) + "/zeroconf/ota_unlock"
-        # 2. Assemble data.
-        data["sequence"] = str(int(time.time()))
+                str(info["port"]) + "/zeroconf/ota_unlock"
+        data = {"sequence": str(int(time.time()))}
         sub_id = info["sub_id"]
         data["deviceid"] = sub_id
 		data["data"]=	{ }
@@ -397,12 +382,10 @@ class ThreadForQT(QThread):
         :return:
         """
         sub_dict = info
-        data = {}
         # 1. Assembly url.
         url = "http://" + info["ip"] + ":" + \
-            str(info["port"]) + "/zeroconf/ota_flash"
-        # 2. Assemble data.
-        data["sequence"] = str(int(time.time()))
+                str(info["port"]) + "/zeroconf/ota_flash"
+        data = {"sequence": str(int(time.time()))}
         sub_id = info["sub_id"]
         data["deviceid"] = sub_id
 		data["data"]=	{ }
@@ -415,11 +398,9 @@ class ThreadForQT(QThread):
         get device info 
         """
         sub_dict=info
-        data={}
         #把组装好url
         url="http://"+info["ip"]+":"+str(info["port"])+"/zeroconf/info"
         #组装好data
         sub_id=info["sub_id"]
-        data["deviceid"]=sub_id
-        data["data"]=	{ }
+        data = {"deviceid": sub_id, "data": {}}
         return self.send_data(send_url=url, send_data=data)

@@ -137,9 +137,6 @@ class SetTimeDialog(QDialog):
         elif self.bg0.checkedId() == 12:
             print("12")
             self.set_sta = False
-        else:
-            # self.info1 = False
-            pass
         if self.bg1.checkedId() == 21:
             print("21")
             self.second_point = True
@@ -258,14 +255,13 @@ class resultDialog(QDialog):
 
     def __init__(self, parent=None, **info):
         super(resultDialog, self).__init__(parent)
-        print("后：%s" % str(info["info"]))
+        print(f'后：{str(info["info"])}')
         all_info = info["info"]
         self.setWindowTitle('result')
         self.resize(200, 100)
         self.setWindowModality(Qt.ApplicationModal)
         grid = QGridLayout()
-        num = 0
-        for x in all_info.keys():
+        for num, x in enumerate(all_info.keys()):
             sub_name = QLabel(parent=self)
             sub_name.setText(x)
             grid.addWidget(sub_name, num, 0, 1, 1)
@@ -277,9 +273,8 @@ class resultDialog(QDialog):
                 sub_ret.setText("error")
             grid.addWidget(sub_ret, num, 1, 1, 1)
             sub_info = QLabel(parent=self)
-            sub_info.setText(str(all_info[x]))
+            sub_info.setText(str(data))
             grid.addWidget(sub_info, num, 2, 2, 1)
-            num += 1
         buttonbox = QDialogButtonBox(parent=self)
         buttonbox.setOrientation(Qt.Horizontal)
         buttonbox.setStandardButtons(
@@ -356,11 +351,8 @@ class RootDialog(QDialog):
         super(RootDialog, self).__init__(parent)
         self.file_flg = False
         self.dev_flg = False
-        print(str(ccs))
-        if "b" not in ccs:
-            self.all_sub = []
-        else:
-            self.all_sub = ccs["b"]
+        print(ccs)
+        self.all_sub = [] if "b" not in ccs else ccs["b"]
         # Sets the title and size of the dialog box
         self.setWindowTitle('Root')
         self.resize(445, 302)
@@ -566,11 +558,10 @@ class RootDialog(QDialog):
         try:
             with open(bin_file, 'rb') as file_obj:
                 b = bytearray(file_obj.read())
-                if (b[2] == 3)and(len(b) < 508000):
-                    file_obj.seek(0, 0)
-                    img = file_obj.read()
-                else:
+                if b[2] != 3 or len(b) >= 508000:
                     return False
+                file_obj.seek(0, 0)
+                img = file_obj.read()
         except BaseException:
             print("unknown err")
             return False
@@ -587,7 +578,7 @@ class RootDialog(QDialog):
         if len(id) <= 1:
             return
         self.dev_flg = True
-        new = "The currently selected device id is" + id
+        new = f"The currently selected device id is{id}"
         QMessageBox.information(
             self,
             "tips",
@@ -676,16 +667,13 @@ class RootDialog(QDialog):
         :return:
         """
         print("unlock SUB：", sub_id)
-        dicta = {"info": self.all_sub, "select_name_list": sub_id}
-        pass
-        dicta["command_num"] = 7
-        vrg = {}
-        command_vrg = {}
-        pass
-        command_vrg["sha256sum"] = sha256
-        command_vrg["sever_ip"] = sever_ip
-        command_vrg["sever_port"] = sever_port
-        vrg["command_vrg"] = command_vrg
+        dicta = {"info": self.all_sub, "select_name_list": sub_id, "command_num": 7}
+        command_vrg = {
+            "sha256sum": sha256,
+            "sever_ip": sever_ip,
+            "sever_port": sever_port,
+        }
+        vrg = {"command_vrg": command_vrg}
         dicta["command_vrg"] = vrg
         self.myThread = ThreadForQT(parent=None, **dicta)
         self.myThread.run_test_Thread.connect(self.do_unlock_result)
@@ -741,7 +729,7 @@ class RootDialog(QDialog):
         if "get" in result_vrg:
             self.root_progressBar.setProperty("value", result_num)
         elif "post" in result_vrg:
-            print("The return value is received：", str(result_num))
+            print("The return value is received：", result_num)
             self.pB_get_device.setDisabled(0)
             self.pB_import_firmware.setDisabled(0)
             self.pB_OK.setDisabled(0)

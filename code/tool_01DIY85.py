@@ -104,12 +104,11 @@ class MainWindow(QMainWindow):
                 QMessageBox.Yes,
                 QMessageBox.Yes)
             return
-        vrg = {}
         # The pop-up dialog box waits for user input
         set_time_dialog = SetTimeDialog()
         set_time_dialog.show()
-        ret = set_time_dialog.exec_()
-        if ret:
+        if ret := set_time_dialog.exec_():
+            vrg = {}
             if set_time_dialog.set_sta:
                 all_time = set_time_dialog.all_time()
                 print("all_time", all_time)
@@ -133,21 +132,13 @@ class MainWindow(QMainWindow):
         """
         # Parses the mDNS to get the inching information to the current device
         # and adds it to the dialog box
-        vrg = {}
-        pass
-        vrg["pulse"] = "on"
+        vrg = {"pulse": "on"}
         sub_info = self.mDNS_info_sta[sub_id]
         all_time = sub_info["pulseWidth"]
         min_time = all_time // 60000
         sec_time = all_time % 60000 // 1000
-        if all_time % 1000 == 500:
-            sec_sta = True
-        else:
-            sec_sta = False
-        if sub_info["pulse"]:
-            sta = True
-        else:
-            sta = False
+        sec_sta = all_time % 1000 == 500
+        sta = bool(sub_info["pulse"])
         #  The pop-up dialog box waits for user input
         set_time_dialog = SetTimeDialog(
             min=min_time, sec=sec_time, pulse=sta, sec_sta=sec_sta)
@@ -184,8 +175,7 @@ class MainWindow(QMainWindow):
         #  The pop-up dialog box waits for user input
         dialog = WIFIDialog()
         dialog.show()
-        ret = dialog.exec_()
-        if ret:
+        if ret := dialog.exec_():
             wifi_name = dialog.name()
             wifi_password = dialog.password()
             print(wifi_name)
@@ -221,15 +211,8 @@ class MainWindow(QMainWindow):
         port = new_list[2]
         data_info = eval(new_list[3])
         data = eval(str(data_info[b'data1'], encoding="utf8"))
-        if "off" in data["switch"]:
-            switch = False
-        else:
-            switch = True
-
-        if "off" in data["pulse"]:
-            pulse = False
-        else:
-            pulse = True
+        switch = "off" not in data["switch"]
+        pulse = "off" not in data["pulse"]
         self.mDNS_info_sta[name] = {
             "ip": ip,
             "port": port,
@@ -420,7 +403,7 @@ class MainWindow(QMainWindow):
             # self.ui.pushButton.setDisabled(0)
             self.thread_number -= 1
             if self.result_ui:
-                print("get：%s" % self.send_result)
+                print(f"get：{self.send_result}")
                 result_ui = resultDialog(info=self.send_result)
                 result_ui.show()
                 result_ui.exec_()
@@ -451,10 +434,10 @@ class MainWindow(QMainWindow):
             return
         dicta = {
             "info": self.mDNS_info_sta,
-            "select_name_list": self.select_name}
-        pass
-        dicta["command_num"] = command_num
-        dicta["command_vrg"] = comand_vrg
+            "select_name_list": self.select_name,
+            "command_num": command_num,
+            "command_vrg": comand_vrg,
+        }
         self.result_ui = True
         if self.thread_number <= 0:
             self.thread_number += 1
@@ -481,10 +464,12 @@ class MainWindow(QMainWindow):
         """
         print("run_a_dev：", sub_id)
         sud_id_tmp = [sub_id]
-        dicta = {"info": self.mDNS_info_sta, "select_name_list": sud_id_tmp}
-        pass
-        dicta["command_num"] = command_num
-        dicta["command_vrg"] = comand_vrg
+        dicta = {
+            "info": self.mDNS_info_sta,
+            "select_name_list": sud_id_tmp,
+            "command_num": command_num,
+            "command_vrg": comand_vrg,
+        }
         self.result_ui = False
         if self.thread_number <= 0:
             self.thread_number += 1
