@@ -49,8 +49,8 @@ class SeverThreadForQT(QThread):
             while True:
                 try:
                     data = self.connfd.recv(1024).decode()
-                    print("len ：", str(len(data)))
-                    print("Receive ：%s" % data)
+                    print("len ：", len(data))
+                    print(f"Receive ：{data}")
                     if "GET" in data:
                         self.do_GET(data)
                     elif "POST" in data:
@@ -82,28 +82,30 @@ class SeverThreadForQT(QThread):
             file_obj.seek(all_read[0], 0)
             self.img = file_obj.read(all_read[1] - all_read[0] + 1)
         # Open the file, read the corresponding data segment sent out
-        print("HEAD：", len(self.img), "ALL LEN：", str(self.bin_len))
-        # The header that assembles the HTTP data
-        send_data = 'HTTP/1.1 206 Partial Content\r\n' + \
-            'Content-type: application/octet-stream\r\n'
-        send_Range = "bytes=" + \
-            str(all_read[0]) + "-" + str(all_read[1]) + "/" + str(self.bin_len)
-        send_data += 'Content-Length: ' + \
-            str(len(self.img)) + '\r\n' + 'Content-Range: ' + send_Range + "\r\n\r\n"
+        print("HEAD：", len(self.img), "ALL LEN：", self.bin_len)
+        send_Range = f"bytes={str(all_read[0])}-{str(all_read[1])}/{str(self.bin_len)}"
+        send_data = (
+            'HTTP/1.1 206 Partial Content\r\n'
+            + 'Content-type: application/octet-stream\r\n'
+        )
+        send_data += (
+            f'Content-Length: {len(self.img)}'
+            + '\r\n'
+            + 'Content-Range: '
+            + send_Range
+            + "\r\n\r\n"
+        )
         self.ckeck_finsh(all_read[1])
         self.my_send_head(send_data)
-        print("send_data", str(send_data))
+        print("send_data", send_data)
         self.connfd.send(self.img)
-        print("send_data", str(self.img))
+        print("send_data", self.img)
         get_new = "get\n\n" + str(self.updata_get_rata(all_read[0]) + 1)
         print(get_new)
         self.ota_state_Thread.emit(get_new)
 
     def ckeck_finsh(self, end_seek):
-        if(self.bin_len - 1) == end_seek:
-            self.send_over_flg = True
-        else:
-            self.send_over_flg = False
+        self.send_over_flg = self.bin_len - 1 == end_seek
 
     def my_send_head(self, data):
         self.connfd.send(bytes(data, "ASCII"))
